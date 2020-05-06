@@ -9,10 +9,13 @@
 # Bootstraps a Fedora 30 or later system on Vultr.com.
 
 # Exit on non-zero return code for any command
-set -ex -o pipefail
+set -e -o pipefail
 
 # Load environment
 [ -s /tmp/firstboot.env ] && source /tmp/firstboot.env
+
+# Echo output
+set -x
 
 #
 # Setup secondary network interface

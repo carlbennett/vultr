@@ -100,7 +100,11 @@ class Bootstrap {
     echo "# Retrieve configuration environment variables\n";
     echo "setup_config_env() {\n";
     echo "  curl -fsSL -o /tmp/firstboot.env.enc \"\${CONFIG_ENV_URL}\" || return $?\n";
-    echo "  echo -n \"\${DECRYPTION_KEY}\" | openssl enc -a -d -aes-256-cbc -salt -pbkdf2 -pass stdin -in /tmp/firstboot.env.enc -out /tmp/firstboot.env || return $?\n";
+    echo "  set +x\n";
+    echo "  echo -n \"\${DECRYPTION_KEY}\" > /tmp/firstboot.env.key\n";
+    echo "  set -x\n";
+    echo "  openssl enc -a -d -aes-256-cbc -salt -pbkdf2 -pass file:/tmp/firstboot.env.key -in /tmp/firstboot.env.enc -out /tmp/firstboot.env || return $?\n";
+    echo "  rm -fv /tmp/firstboot.env.key\n";
     echo "}\n";
     echo "setup_config_env || echo 'Failed to setup config.env'\n";
     echo "\n";
