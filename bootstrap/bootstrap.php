@@ -181,7 +181,7 @@ function main() {
     }
   }
 
-  if (empty($buffer[count($buffer)-1])) array_pop($buffer);
+  if ($buffer[count($buffer)-1] == '#') array_pop($buffer);
 
   $buffer = str_replace('#{BOOTSTRAP_INIT_LOG}', implode("\n", $buffer), $script);
 
