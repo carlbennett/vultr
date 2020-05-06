@@ -60,11 +60,52 @@ class Bootstrap {
     return false;
   }
 
+  public static function generate_preloader() {
+    ob_start();
+
+    echo "#!/usr/bin/env bash\n";
+    echo "# vim: set colorcolumn=:\n";
+    echo "#\n";
+    echo "# @author    Carl Bennett <carl@carlbennett.me>\n";
+    echo "# @copyright (c) 2020 Carl Bennett, All Rights Reserved.\n";
+    echo "#\n";
+    echo "# Dynamically bootstraps a Vultr system.\n";
+    echo "set -ex -o pipefail\n";
+    echo "\n";
+    echo "# Retrieve configuration environment variables\n";
+    echo "setup_config_env() {\n";
+    echo "  curl -fsSL -o /tmp/firstboot.env.enc \"\${CONFIG_ENV_URL}\" || return $?\n";
+    echo "  echo -n \"\${DECRYPTION_KEY}\" | openssl enc -a -d -aes-256-cbc -salt -pbkdf2 -pass stdin -in /tmp/firstboot.env.enc -out /tmp/firstboot.env || return $?\n";
+    echo "}\n";
+    echo "setup_config_env || echo 'Failed to setup config.env'\n";
+    echo "\n";
+    echo "# Retrieve bootstrap script\n";
+    echo "setup_bootstrap() {\n";
+    echo "  curl -fsSL -o /tmp/bootstrap.chain.sh \\\n";
+    echo "    -d \"hostname=\$(hostname -f)\" \\\n";
+    echo "    -d \"platform=\$(egrep '^ID' /etc/os-release | cut -c4-)\" \\\n";
+    echo "    -d \"platform_version=\$(egrep '^VERSION_ID' /etc/os-release | cut -c12-)\" \\\n";
+    echo "    \"\${BOOTSTRAP_URL}\" || return $?\n";
+    echo "  [ -s /tmp/bootstrap.chain.sh ] && chmod +x /tmp/bootstrap.chain.sh\n";
+    echo "}\n";
+    echo "setup_bootstrap || echo 'Failed to download bootstrap script'\n";
+    echo "\n";
+    echo "# Begin bootstrap chain\n";
+    echo "exec /tmp/bootstrap.chain.sh $@\n";
+
+    return ob_get_clean();
+  }
+
   public function generate_script() {
-    $script = $this->read_child_script();
+
+    if (empty($this->app) && empty($this->hostname) && empty($this->platform) && empty($this->platform_version)) {
+      $script = self::generate_preloader();
+    } else {
+      $script = $this->read_child_script();
+    }
 
     if ($script === false) {
-      return "#!/usr/bin/env bash\necho 'Error: Unable to locate suitable bootstrap script'\nexit 1\n";
+      return "#!/usr/bin/env bash\necho 'Error: Unable to locate suitable bootstrap script' 1>&2\nexit 1\n";
     }
 
     return $script;
@@ -115,7 +156,7 @@ function main() {
     }
   }
 
-  array_pop($buffer);
+  if (empty($buffer[count($buffer)-1])) array_pop($buffer);
 
   $buffer = str_replace('#{BOOTSTRAP_INIT_LOG}', implode("\n", $buffer), $script);
 
