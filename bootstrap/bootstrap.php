@@ -70,7 +70,7 @@ class Bootstrap {
     echo "Available information is non-specific. Cannot configure system.\n";
     echo "For specific bootstrap configuration, POST to the following url:\n";
     echo "\n";
-    echo "  https://silicon.carlbennett.me/vultr/bootstrap/bootstrap.php\n";
+    echo "  https://" . getenv('HTTP_HOST') . "/vultr/bootstrap/bootstrap.php\n";
     echo "\n";
     echo "POST body should be a url-encoded combination of any of:\n";
     echo "\n";
