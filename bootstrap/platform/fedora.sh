@@ -3,7 +3,7 @@
 #
 #{BOOTSTRAP_INIT_LOG}
 #
-# @author    Carl Bennett
+# @author    Carl Bennett <carl@carlbennett.me>
 # @copyright (c) 2020 Carl Bennett, All Rights Reserved.
 #
 # Bootstraps a Fedora 30 or later system on Vultr.com.
