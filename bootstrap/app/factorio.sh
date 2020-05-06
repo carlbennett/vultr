@@ -154,7 +154,7 @@ setup_factorio() {
     --add-repo \
     https://download.docker.com/linux/fedora/docker-ce.repo
 
-  dnf install -y docker-ce docker-ce-cli containerd.io
+  dnf install -y --releasever=31 docker-ce docker-ce-cli containerd.io
 
   systemctl enable --now docker.service
 
