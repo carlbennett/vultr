@@ -44,8 +44,6 @@ class Bootstrap {
       $files[] = sprintf('platform/%s.sh', $this->platform);
     }
 
-    $files[] = '_default.sh';
-
     foreach ($files as $file) {
       $full_path = $path . $file;
 
@@ -58,6 +56,33 @@ class Bootstrap {
     }
 
     return false;
+  }
+
+  public static function generate_usage_error() {
+    ob_start();
+
+    echo "#!/usr/bin/env bash\n";
+    echo "# vim: set colorcolumn=0:\n";
+    echo "#\n";
+    echo "#{BOOTSTRAP_INIT_LOG}\n";
+    echo "#\n";
+    echo "cat > /dev/stderr <<EOF\n";
+    echo "Available information is non-specific. Cannot configure system.\n";
+    echo "For specific bootstrap configuration, POST to the following url:\n";
+    echo "\n";
+    echo "  https://silicon.carlbennett.me/vultr/bootstrap/bootstrap.php\n";
+    echo "\n";
+    echo "POST body should be a url-encoded combination of any of:\n";
+    echo "\n";
+    echo "  app={PROJECT_NAME}\n";
+    echo "  hostname={HOSTNAME}\n";
+    echo "  platform={PLATFORM}\n";
+    echo "  platform_version={PLATFORM_VERSION}\n";
+    echo "\n";
+    echo "Supported values vary, though they should be automatically set.\n";
+    echo "EOF\n";
+
+    return ob_get_clean();
   }
 
   public static function generate_preloader() {
@@ -104,8 +129,8 @@ class Bootstrap {
       $script = $this->read_child_script();
     }
 
-    if ($script === false) {
-      return "#!/usr/bin/env bash\necho 'Error: Unable to locate suitable bootstrap script' 1>&2\nexit 1\n";
+    if ($script === false || empty($script)) {
+      $script = $this->generate_usage_error();
     }
 
     return $script;
