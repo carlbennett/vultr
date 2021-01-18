@@ -99,7 +99,7 @@ class Bootstrap {
     echo "\n";
     echo "# Retrieve configuration environment variables\n";
     echo "setup_config_env() {\n";
-    echo "  curl -fsSL -o /tmp/firstboot.env.enc \"\${CONFIG_ENV_URL}\" || return $?\n";
+    echo "  curl -6fsSL -o /tmp/firstboot.env.enc \"\${CONFIG_ENV_URL}\" || return $?\n";
     echo "  set +x\n";
     echo "  echo -n \"\${DECRYPTION_KEY}\" > /tmp/firstboot.env.key\n";
     echo "  set -x\n";
@@ -112,8 +112,8 @@ class Bootstrap {
     echo "setup_bootstrap() {\n";
     echo "  curl -fsSL -o /tmp/bootstrap.chain.sh \\\n";
     echo "    -d \"hostname=\$(hostname -f)\" \\\n";
-    echo "    -d \"platform=\$(egrep '^ID' /etc/os-release | cut -c4-)\" \\\n";
-    echo "    -d \"platform_version=\$(egrep '^VERSION_ID' /etc/os-release | cut -c12-)\" \\\n";
+    echo "    -d \"platform=\$(egrep '^ID=' /etc/os-release | cut -c4-)\" \\\n";
+    echo "    -d \"platform_version=\$(egrep '^VERSION_ID=' /etc/os-release | cut -c12-)\" \\\n";
     echo "    \"\${BOOTSTRAP_URL}\" || return $?\n";
     echo "  [ -s /tmp/bootstrap.chain.sh ] && chmod +x /tmp/bootstrap.chain.sh\n";
     echo "}\n";

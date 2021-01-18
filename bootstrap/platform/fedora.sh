@@ -45,7 +45,7 @@ setup_swap() {
   [ -z "${SWAPFILE}" ] && return 0
   [ -z "${SWAPSIZE}" ] && return 0
 
-  fallocate -l "${SWAPSIZE}" "${SWAPFILE}"
+  dd if=/dev/zero of="${SWAPFILE}" bs=1M count="${SWAPSIZE}" status=progress
   chmod 600 "${SWAPFILE}"
   mkswap "${SWAPFILE}"
   swapon "${SWAPFILE}"
@@ -63,6 +63,15 @@ setup_swap || echo 'Failed to setup swap'
 # Upgrade system packages
 #
 dnf upgrade -y --refresh --setopt=install_weak_deps=False --best || echo 'Failed to upgrade system packages'
+
+#
+# Install standard suite of additional packages
+#
+dnf install -y \
+    bind-utils     bzip2          curl           firewalld      git            \
+    gzip           htop           mtr            net-tools      nmap-ncat      \
+    tar            tmux           traceroute     unzip          vim-enhanced   \
+    wget           whois          zip
 
 #
 # Setup monitoring
@@ -138,6 +147,30 @@ AuthMethod=PLAIN
 EOF
 }
 setup_mail_relay || echo 'Failed to setup mail relay'
+
+#
+# Setup fail2ban
+#
+setup_fail2ban() {
+  dnf install -y fail2ban-firewalld fail2ban-selinux fail2ban-server
+  cat <<EOF > /etc/fail2ban/jail.d/01-sshd.conf
+[sshd]
+enabled = true
+
+findtime = 600
+maxretry = 5
+bantime = 3600
+EOF
+  cat <<EOF > /etc/fail2ban/jail.d/99-local.conf
+[DEFAULT]
+destemail = carl@carlbennett.me
+sendername = fail2ban@carlbennett.me
+mta = sendmail
+#action = %(action_mwl)s
+EOF
+  systemctl enable --now fail2ban.service
+}
+setup_fail2ban || echo 'Failed to setup fail2ban'
 
 #
 # Setup the motd script

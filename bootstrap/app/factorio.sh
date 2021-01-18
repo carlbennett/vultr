@@ -45,7 +45,7 @@ setup_swap() {
   [ -z "${SWAPFILE}" ] && return 0
   [ -z "${SWAPSIZE}" ] && return 0
 
-  fallocate -l "${SWAPSIZE}" "${SWAPFILE}"
+  dd if=/dev/zero of="${SWAPFILE}" bs=1M count="${SWAPSIZE}" status=progress
   chmod 600 "${SWAPFILE}"
   mkswap "${SWAPFILE}"
   swapon "${SWAPFILE}"
@@ -63,6 +63,15 @@ setup_swap || echo 'Failed to setup swap'
 # Upgrade system packages
 #
 dnf upgrade -y --refresh --setopt=install_weak_deps=False --best || echo 'Failed to upgrade system packages'
+
+#
+# Install standard suite of additional packages
+#
+dnf install -y \
+    bind-utils     bzip2          curl           firewalld      git            \
+    gzip           htop           mtr            net-tools      nmap-ncat      \
+    tar            tmux           traceroute     unzip          vim-enhanced   \
+    wget           whois          zip
 
 #
 # Setup monitoring
@@ -160,6 +169,9 @@ setup_factorio() {
   dnf install -y --releasever=31 docker-ce docker-ce-cli containerd.io
 
   systemctl enable --now docker.service
+
+  rpm --quiet -q grubby || dnf install -y grubby
+  grubby --update-kernel=ALL --args='systemd.unified_cgroup_hierarchy=0'
 
   mkdir -p /opt/factorio
   chown 845:845 /opt/factorio
