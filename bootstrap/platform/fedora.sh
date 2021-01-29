@@ -77,6 +77,20 @@ dnf install -y \
     wget           whois          zip
 
 #
+# Enable automatic security updates via dnf-automatic
+#
+setup_dnf_automatic() {
+  dnf install -y dnf-automatic
+
+  sed -i 's/^upgrade_type = default/upgrade_type = security/' /etc/dnf/automatic.conf
+  sed -i 's/^email_from = root@example.com/email_from = dnf-automatic@carlbennett.me/' /etc/dnf/automatic.conf
+  sed -i 's/^email_to = root/email_to = carl@carlbennett.me/' /etc/dnf/automatic.conf
+
+  systemctl enable --now dnf-automatic-install.timer
+}
+setup_dnf_automatic || echo 'Failed to setup dnf automatic updates'
+
+#
 # Setup monitoring
 #
 setup_monitoring() {
