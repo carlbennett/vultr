@@ -84,7 +84,7 @@ setup_dnf_automatic() {
 
   sed -i 's/^upgrade_type = default/upgrade_type = security/' /etc/dnf/automatic.conf
   sed -i 's/^email_from = root@example.com/email_from = dnf-automatic@carlbennett.me/' /etc/dnf/automatic.conf
-  sed -i 's/^email_to = root/email_to = carl@carlbennett.me/' /etc/dnf/automatic.conf
+  sed -i 's/^email_to = root/email_to = '"${SYSADMIN}"'/' /etc/dnf/automatic.conf
 
   systemctl enable --now dnf-automatic-install.timer
 }
@@ -180,7 +180,7 @@ bantime = 3600
 EOF
   cat <<EOF > /etc/fail2ban/jail.d/99-local.conf
 [DEFAULT]
-destemail = carl@carlbennett.me
+destemail = ${SYSADMIN}
 sendername = fail2ban@carlbennett.me
 mta = sendmail
 #action = %(action_mwl)s
