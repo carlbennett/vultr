@@ -21,6 +21,9 @@ set -x
 # Setup secondary network interface
 #
 setup_secondary_network() {
+  eth1_id=`curl -s 'http://169.254.169.254/v1/interfaces/1/networkid'`
+  [ -n "${eth1_id}" ] && echo 'Empty network id for interface 1' && return 1
+
   eth1_mac=`curl -s 'http://169.254.169.254/v1/interfaces/1/mac'`
   eth1_addr=`curl -s 'http://169.254.169.254/v1/interfaces/1/ipv4/address'`
   eth1_netmask=`curl -s 'http://169.254.169.254/v1/interfaces/1/ipv4/netmask'`
