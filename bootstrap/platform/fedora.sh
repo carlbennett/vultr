@@ -127,13 +127,19 @@ setup_monitoring || echo 'Failed to setup monitoring'
 # Setup firewall
 #
 setup_firewall() {
-  eth1_addr=`curl -s 'http://169.254.169.254/v1/interfaces/1/ipv4/address'`
-  eth1_netmask=`curl -s 'http://169.254.169.254/v1/interfaces/1/ipv4/netmask'`
-  eval $(ipcalc -np "${eth1_addr}" "${eth1_netmask}")
-  eth1_network="${NETWORK}/${PREFIX}"
+  eth1_id="$(curl -fsL 'http://169.254.169.254/v1/interfaces/1/networkid' | grep -P -o '^net(?:[0-9a-f]{13})$')"
 
-  [[ "${eth1_network}" == '/' ]] && eth1_network='' || \
-    firewall-cmd --permanent --zone trusted --add-source "${eth1_network}"
+  if [ -z "${eth1_id}" ]; then
+    echo 'Empty network id for interface 1'
+  else
+    eth1_addr=`curl -s 'http://169.254.169.254/v1/interfaces/1/ipv4/address'`
+    eth1_netmask=`curl -s 'http://169.254.169.254/v1/interfaces/1/ipv4/netmask'`
+    eval $(ipcalc -np "${eth1_addr}" "${eth1_netmask}")
+    eth1_network="${NETWORK}/${PREFIX}"
+
+    [[ "${eth1_network}" == '/' ]] && eth1_network='' || \
+      firewall-cmd --permanent --zone trusted --add-source "${eth1_network}"
+  fi
 
   for network in ${TRUSTED_NETWORKS[@]}; do
     firewall-cmd --permanent --zone trusted --add-source "${network}"
