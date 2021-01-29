@@ -21,12 +21,12 @@ set -x
 # Setup secondary network interface
 #
 setup_secondary_network() {
-  eth1_id=`curl -s 'http://169.254.169.254/v1/interfaces/1/networkid'`
-  [ -n "${eth1_id}" ] && echo 'Empty network id for interface 1' && return 1
+  eth1_id="$(curl -fsL 'http://169.254.169.254/v1/interfaces/1/networkid' | grep -P -o '^net(?:[0-9a-f]{13})$')"
+  [ -z "${eth1_id}" ] && echo 'Empty network id for interface 1' && return 1
 
-  eth1_mac=`curl -s 'http://169.254.169.254/v1/interfaces/1/mac'`
-  eth1_addr=`curl -s 'http://169.254.169.254/v1/interfaces/1/ipv4/address'`
-  eth1_netmask=`curl -s 'http://169.254.169.254/v1/interfaces/1/ipv4/netmask'`
+  eth1_mac="$(curl -fsL 'http://169.254.169.254/v1/interfaces/1/mac')"
+  eth1_addr="$(curl -fsL 'http://169.254.169.254/v1/interfaces/1/ipv4/address')"
+  eth1_netmask="$(curl -fsL 'http://169.254.169.254/v1/interfaces/1/ipv4/netmask')"
   eth1_mtu=1450 # Vultr recommends 1450 MTU for private network interface
 
   eth1_nic=`nmcli --fields 'GENERAL.DEVICE,GENERAL.HWADDR' d show | grep -i "$eth1_mac" -B1 | head -n1 | awk '{print $2}'`
