@@ -144,28 +144,6 @@ setup_firewall() {
 setup_firewall || echo 'Failed to setup firewall settings'
 
 #
-# Setup mail relay
-#
-setup_mail_relay() {
-  dnf install -y ssmtp
-  dnf remove -y postfix
-  rm -Rfv /etc/postfix
-  [ -f /etc/ssmtp/ssmtp.conf ] && mv -v /etc/ssmtp/ssmtp.conf /etc/ssmtp/ssmtp.conf.rpmsave
-  cat <<EOF > /etc/ssmtp/ssmtp.conf
-root=
-mailhub=${SMTP_HOST}
-RewriteDomain=${SMTP_REWRITEDOMAIN}
-UseTLS=Yes
-UseSTARTTLS=Yes
-TLS_CA_File=/etc/pki/tls/certs/ca-bundle.crt
-AuthUser=${SMTP_USER}
-AuthPass=${SMTP_PASS}
-AuthMethod=PLAIN
-EOF
-}
-setup_mail_relay || echo 'Failed to setup mail relay'
-
-#
 # Setup fail2ban
 #
 setup_fail2ban() {
@@ -188,6 +166,28 @@ EOF
   systemctl enable --now fail2ban.service
 }
 setup_fail2ban || echo 'Failed to setup fail2ban'
+
+#
+# Setup mail relay
+#
+setup_mail_relay() {
+  dnf install -y ssmtp
+  dnf remove -y postfix
+  rm -Rfv /etc/postfix
+  [ -f /etc/ssmtp/ssmtp.conf ] && mv -v /etc/ssmtp/ssmtp.conf /etc/ssmtp/ssmtp.conf.rpmsave
+  cat <<EOF > /etc/ssmtp/ssmtp.conf
+root=
+mailhub=${SMTP_HOST}
+RewriteDomain=${SMTP_REWRITEDOMAIN}
+UseTLS=Yes
+UseSTARTTLS=Yes
+TLS_CA_File=/etc/pki/tls/certs/ca-bundle.crt
+AuthUser=${SMTP_USER}
+AuthPass=${SMTP_PASS}
+AuthMethod=PLAIN
+EOF
+}
+setup_mail_relay || echo 'Failed to setup mail relay'
 
 #
 # Setup the motd script
