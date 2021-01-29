@@ -206,7 +206,7 @@ send_email || echo 'Failed to send email with output log'
 #
 # Copy output of log from /tmp to /var/tmp to survive reboot
 #
-cp -av /tmp/firstboot.log /var/tmp/firstboot.log
+[ -f /tmp/firstboot.log ] && cp -av /tmp/firstboot.log /var/tmp/firstboot.log
 
 #
 # Reboot
